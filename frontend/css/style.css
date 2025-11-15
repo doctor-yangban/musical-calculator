@@ -1,0 +1,10 @@
+.highlight {
+    border: 1px solid #000000;
+    border-radius: 8vmax;
+    min-width: 2rem;
+    display: block;
+    margin-top: 0.5em;
+    text-align: center;
+    background: #557799 !important;
+    color: #ffffff !important
+}

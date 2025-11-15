@@ -1,0 +1,26 @@
+{
+  "name": "musical-calculator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doctor-yangban/musical-calculator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/doctor-yangban/musical-calculator/issues"
+  },
+  "homepage": "https://github.com/doctor-yangban/musical-calculator#readme",
+  "description": "",
+  "dependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "midi-player-js": "^2.0.16",
+    "midijs": "^0.12.0",
+    "soundfont-player": "^0.12.0",
+    "vue-router": "^4.6.3"
+  }
+}
