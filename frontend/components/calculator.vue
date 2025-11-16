@@ -144,9 +144,10 @@ export default {
     computed: {
         buttons: function () {
             var rtobj = {};
+            console.log(this.$refs);
             for (var key in this.buttonMap) {
                 if (this.isStr(key)) {
-                    rtobj[key] = this.$refs.calculator.querySelector(`[data-button="${key}"]`);
+                    rtobj[key] = this.$refs.calculator.querySelector(`[data-button-key="${key}"]`);
                 }
             }
             return rtobj;
@@ -154,15 +155,20 @@ export default {
     },
     methods: {
         addListeners: function () {
-            var buttons = this.buttons.filter(val => val !== null);
-            for (var key of buttons) {
-                buttons[key].addEventListener("click", (ev) => {
-                    buttons[key].classList.add("highlight");
-                    setTimeout(() => {
-                        buttons[key].classList.remove("highlight");
-                    }, this.config?.duration || 800);
-                    this.playNote(this.buttonMap[key]);
-                });
+            var buttons = this.buttons;
+            for (var key in buttons) {
+                if (buttons[key] === null) {
+                    continue;
+                }
+                ((key) => {
+                    buttons[key].addEventListener("click", (ev) => {
+                        buttons[key].classList.add("highlight");
+                        setTimeout(() => {
+                            buttons[key].classList.remove("highlight");
+                        }, this.config?.duration || 800);
+                        this.playNote(this.buttonMap[key]);
+                    });
+                })(key);
             }
         }
     },

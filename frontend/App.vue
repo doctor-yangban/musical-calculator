@@ -5,7 +5,7 @@ import mainComponent from './main.vue';
 <template>
     <mainComponent />
 </template>
-<style scoped>
+<style>
 @import "./css/style.css";
 </style>
 <script>

@@ -17,7 +17,13 @@ export default {
             for (var noteName of this.noteNames) {
                 this.currKeys[noteName] = false;
             }
-            Soundfont.instrument(this.ac, "AR-7778", { soundfont: 'FluidR3_GM', from: 'chonggi-tokhu.github.io/AR-7778/audio/' }).then((instrument) => {
+            Soundfont.instrument(this.ac, "AR-7778", {
+                soundfont: 'FluidR3_GM', from: 'chonggi-tokhu.github.io/AR-7778/audio/', nameToUrl: function (name, sf, format) {
+                    format = format === "ogg" ? format : "mp3";
+                    sf = sf === "FluidR3_GM" ? sf : "MusyngKite";
+                    return "https://chonggi-tokhu.github.io/AR-7778/audio/" + sf + "/" + name + "-" + format + ".js";
+                }
+            }).then((instrument) => {
                 this.instrument = instrument;
                 if (this.isFunc(cbfunc)) {
                     cbfunc(instrument);
