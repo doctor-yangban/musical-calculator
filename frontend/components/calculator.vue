@@ -1,13 +1,20 @@
 <script setup>
 import mixins from '../mixins';
+import divinput from './divinput.vue';
 </script>
 <template>
-    <div class="musical-calculator" ref="calculator">
+    <div class="musical-calculator" ref="calculator" :tabindex="tabidx">
         <div>
             <div style="display: flex;">
-                <div contenteditable="true"
-                    style="background: #1c873c;color:#000000;width: 100%;height: 1.5em;margin-left: 0.5rem;margin-right: 0.5rem;">
-                    1972-11-21</div>
+                <div class="display">
+
+                    <divinput
+                        :style="{ 'font-size': '.6rem', 'max-width': '50vw', 'min-width': 'calc(var(--min-width) / 2)', 'position': 'relative' }"
+                        :model="currExprStr" />
+                    <div style="font-size:.6rem;font-weight: bold;font-style:italic;max-width:50vw;">
+                        {{ currAns }}</div>
+
+                </div>
             </div>
             <div style="display: flex;">
                 <div class="calc-button" style="height: 2em;"><span
@@ -116,6 +123,28 @@ import mixins from '../mixins';
     margin-top: 0.5em;
     text-align: center;
 }
+
+.display {
+    background: #1c873c;
+    color: #000000;
+    padding-top: .1rem;
+    padding-bottom: .1rem;
+    height: 1.6rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-style: italic;
+    line-height: .7rem;
+    overflow: scroll;
+    max-width: 100vw;
+    --min-width: 22.5rem;
+    min-width: var(--min-width);
+}
+
+.display::-webkit-scrollbar {
+    display: none;
+}
 </style>
 <script>
 export default {
@@ -139,12 +168,60 @@ export default {
                 '/': 'A5',
                 '=': 'B5',
             }
+        },
+        tabidx: {
+            type: Number,
+            default: -1,
+        },
+        keyMap: {
+            type: Object,
+            default: {
+                48: '0',
+                49: '1',
+                50: '2',
+                51: '3',
+                52: '4',
+                53: '5',
+                54: '6',
+                55: '7',
+                56: '8',
+                57: '9',
+                187: '=',
+                189: '-',
+            }
+        }
+    },
+    data: function () {
+        return {
+            currAns: 0,
+            currSymbol: '',
+            currExprStr: '',
+            btnClickListeners: [
+                (key, buttons) => {
+                    return (ev) => {
+                        buttons[key].classList.add("highlight");
+                        setTimeout(() => {
+                            buttons[key].classList.remove("highlight");
+                        }, this.config?.duration || 800);
+                        this.playNote(this.buttonMap[key]);
+                    }
+                },
+                (key, buttons) => {
+                    return (ev) => {
+                        if (key === '=') {
+                            this.currAns = this.calculate(this.currExprStr);
+                        } else {
+                            this.currExprStr += key;
+                        }
+                    }
+                },
+            ],
         }
     },
     computed: {
         buttons: function () {
             var rtobj = {};
-            console.log(this.$refs);
+            //console.log(this.$refs);
             for (var key in this.buttonMap) {
                 if (this.isStr(key)) {
                     rtobj[key] = this.$refs.calculator.querySelector(`[data-button-key="${key}"]`);
@@ -154,23 +231,54 @@ export default {
         },
     },
     methods: {
+        /* btnClickListenerFunc: function (ev, btnKey, buttons) {
+            for (var listener of this.btnClickListeners) {
+                if (this.isFunc(listener)) {
+                    listener(btnKey, buttons).apply(this, ev);
+                }
+            }
+        },
+        btnClickListener: function (ev) {
+            console.log(this.btnKey);
+            this.btnClickListenerFunc(ev, this.btnKey, this.buttons);
+        },
+        addBtnClickListener: function (btnKey, buttons) {
+            console.log({ btnKey: btnKey, buttons: buttons, ...this });
+            buttons[btnKey].addEventListener("click", this.btnClickListener.bind({ btnKey: btnKey, buttons: buttons, ...this }));
+        }, */
+        addBtnClickListener: function (btnKey) {
+            for (var listener of this.btnClickListeners) {
+                if (this.isFunc(listener)) {
+                    this.buttons[btnKey].addEventListener("click", listener(btnKey, this.buttons).bind(this));
+                }
+            }
+        },
         addListeners: function () {
             var buttons = this.buttons;
             for (var key in buttons) {
                 if (buttons[key] === null) {
                     continue;
                 }
-                ((key) => {
-                    buttons[key].addEventListener("click", (ev) => {
-                        buttons[key].classList.add("highlight");
-                        setTimeout(() => {
-                            buttons[key].classList.remove("highlight");
-                        }, this.config?.duration || 800);
-                        this.playNote(this.buttonMap[key]);
-                    });
-                })(key);
+                this.addBtnClickListener(key);
+                /* ((key) => {
+                    buttons[key].addEventListener("click", this.btnClickListenerFunc);
+                })(key); */
+                //this.addBtnClickListener(key, buttons);
             }
-        }
+            this.$refs.calculator.addEventListener("keydown", (ev) => {
+                var button = buttons[this.keyMap[ev.keyCode]];
+                console.log(this.keyMap[ev.keyCode]);
+                console.log(buttons);
+                console.log(ev.keyCode)
+                if (button !== null) {
+                    button.click();
+                }
+            })
+        },
+        calculate: function (exprStr) {
+            var formattedExprStr = exprStr.replaceAll('×', '*').replaceAll('÷', '/');
+            return Function(`return ${formattedExprStr};`)();
+        },
     },
     mounted: function () {
         this.initFuncCb = (inst) => {
