@@ -1,6 +1,8 @@
 <script setup>
 import mixins from '../mixins';
 import divinput from './divinput.vue';
+import midiPlayer from './midiPlayer.vue';
+import MidiPlayer from 'midi-player-js';
 </script>
 <template>
     <div class="musical-calculator" ref="calculator" :tabindex="tabidx">
@@ -9,7 +11,7 @@ import divinput from './divinput.vue';
                 <div class="display">
 
                     <divinput
-                        :style="{ 'font-size': 'calc(.6rem * var(--calculatorSize))', 'max-width': '50vw', 'min-width': 'calc(var(--min-width) / 2)', 'position': 'relative' }"
+                        :style="{ 'font-size': 'calc(.6rem * var(--calculatorSize))', 'width': 'calc(var(--min-width) / 2)', 'position': 'relative' }"
                         :model="currExprStr" />
                     <div
                         style="font-size:calc(.6rem * var(--calculatorSize));font-weight: bold;font-style:italic;max-width:50vw;">
@@ -24,13 +26,15 @@ import divinput from './divinput.vue';
                 <div class="calc-button"><span style="background: black;color:white;">音量</span></div>
                 <div class="calc-button"><span style="background: black;color:white;">時間</span></div>
                 <div class="calc-button"><span style="background: black;color:white;">鬧鈴</span></div>
-                <div class="calc-button"><span style="background: darkred;color:white;">AC</span></div>
+                <div class="calc-button"><span style="background: darkred;color:white;"
+                        @click="currExprStr = ''; currAns = 0">AC</span></div>
             </div>
             <div style="display:flex;position: relative;left: 2.2rem;">
                 <div class="calc-button"><span style="background: blue;color:white;">M+</span></div>
                 <div class="calc-button"><span style="background: blue;color:white;">M-</span></div>
                 <div class="calc-button"><span style="background: blue;color:white;">MRC</span></div>
-                <div class="calc-button"><span style="background: darkred;color:white;" data-button-key="CE">CE</span>
+                <div class="calc-button"><span style="background: darkred;color:white;" data-button-key="CE"
+                        @click="currExprStr = currExprStr.slice(0, currExprStr.length - 1)">CE</span>
                 </div>
             </div>
             <div style="display:flex;">
@@ -99,9 +103,15 @@ import divinput from './divinput.vue';
     --calculatorSize: 1;
 }
 
-@media (max-width:850px) {
+@media (min-width:500px) {
     * {
-        --calculatorSize: calc(100vw / 400px) !important;
+        --calculatorSize: 1.35 !important;
+    }
+}
+
+@media (min-width:900px) {
+    * {
+        --calculatorSize: 1 !important;
     }
 }
 
@@ -149,19 +159,25 @@ import divinput from './divinput.vue';
     font-weight: bold;
     font-style: italic;
     line-height: calc(.6rem * var(--calculatorSize));
-    overflow: scroll;
+    overflow: scroll !important;
     max-width: 100vw;
     --min-width: calc(22.5rem * var(--calculatorSize));
     min-width: var(--min-width);
 }
 
-.display::-webkit-scrollbar {
+.display>* {
+    overflow: scroll !important;
+    overflow-x: scroll !important;
+}
+
+.display::-webkit-scrollbar,
+.display>*::-webkit-scrollbar {
     display: none;
 }
 </style>
 <script>
 export default {
-    mixins: [mixins],
+    mixins: [mixins, midiPlayer],
     props: {
         buttonMap: {
             type: [Object],
@@ -229,6 +245,8 @@ export default {
                     }
                 },
             ],
+            playedNote: null,
+            localMidiFile: null,
         }
     },
     computed: {
@@ -242,6 +260,13 @@ export default {
             }
             return rtobj;
         },
+        noteToBtn: function () {
+            var rtobj = {};
+            for (var key in this.buttonMap) {
+                rtobj[this.buttonMap[key]] = key;
+            }
+            return rtobj;
+        }
     },
     methods: {
         /* btnClickListenerFunc: function (ev, btnKey, buttons) {
@@ -292,12 +317,99 @@ export default {
             var formattedExprStr = exprStr.replaceAll('×', '*').replaceAll('÷', '/');
             return Function(`return ${formattedExprStr};`)();
         },
+        loadMidiFile: function () {
+            if (this.localMidiFile === null) {
+                console.log(this.localMidiFile);
+                return;
+            }
+            if (this.midiplayer !== null) {
+                console.log('aaa');
+                this.midiplayer.stop();
+                this.midiplayer.loadArrayBuffer(this.localMidiFile);
+                this.midiplayer.on('midiEvent', (ev) => {
+                    if (ev.name === 'Note on') {
+                        /* console.log(this.noteToAllBtn[ev.noteName]);
+                        console.log(this.allBtns);
+                        var button = this.allBtns[this.noteToAllBtn[ev.noteName]];
+                        if (button !== null) {
+                            button.click();
+                        } */
+                        setTimeout(() => { this.playedNote = ev.noteName; }, this.config?.duration || 800);
+                    }
+                });
+                this.midiplayer.play();
+            } else {
+                this.midiplayer = new MidiPlayer.Player((ev) => {
+                    if (ev.name === 'Note on') {
+                        /* console.log(this.noteToAllBtn[ev.noteName]);
+                        console.log(this.allBtns);
+                        var button = this.allBtns[this.noteToAllBtn[ev.noteName]];
+                        if (button !== null) {
+                            button.click();
+                        } */
+                        setTimeout(() => { this.playedNote = ev.noteName; }, this.config?.duration || 800);
+                    }
+                });
+                this.midiplayer.loadArrayBuffer(this.localMidiFile);
+                console.log(this.midiplayer);
+                this.midiplayer.play();
+            }
+        },
+        readLocalMidiFile: function (file) {
+            var reader = new FileReader();
+            if (file) {
+                reader.readAsArrayBuffer(file);
+            }
+            reader.addEventListener("load", (ev) => {
+                this.localMidiFile = reader.result;
+            });
+        }
+
     },
     mounted: function () {
         this.initFuncCb = (inst) => {
             this.addListeners();
+            console.log(this.midiplayer);
+            this.midiplayer.on('midiEvent', (ev) => {
+                if (ev.name === 'Note on') {
+                    console.log(this.noteToBtn[ev.noteName]);
+                    var button = this.buttons[this.noteToBtn[ev.noteName]];
+                    if (button !== null) {
+                        button.click();
+                    }
+                }
+            });
         }
         this.buttonsSet = true;
-    }
+        /*
+        this.onFileChanged = () => {
+            if (this.midiplayer !== null) {
+                console.log('aaa');
+                this.midiplayer.stop();
+            } else {
+                this.midiplayer = new MidiPlayer.Player((ev) => {
+                    console.log(ev.name);
+                    if (ev.name === 'Note on') {
+                        console.log(this.noteToBtn[ev.noteName]);
+                        var button = this.buttons[this.noteToBtn[ev.noteName]];
+                        if (button !== null) {
+                            button.click();
+                        }
+                    }
+                });
+                this.midiplayer.loadArrayBuffer(this.midiFile);
+                console.log(this.midiplayer);
+                this.midiplayer.play();
+            }
+        } */
+    },
+    watch: {
+        playedNote: function () {
+            var button = this.buttons[this.noteToBtn[this.playedNote]];
+            if (button !== null) {
+                button.click();
+            }
+        },
+    },
 }
 </script>

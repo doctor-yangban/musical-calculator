@@ -1,4 +1,5 @@
 import Soundfont from 'soundfont-player';
+import MidiPlayer from 'midi-player-js';
 import global from './global';
 export default {
     mixins: [global],
@@ -10,6 +11,9 @@ export default {
             player: null,
             instrument: null,
             currKeys: {},
+            midiplayer: null,
+            midiFile: null,
+            playMidiFuncs: [],
         }
     },
     methods: {
@@ -25,6 +29,7 @@ export default {
                 }
             }).then((instrument) => {
                 this.instrument = instrument;
+                this.midiplayer = new MidiPlayer.Player();
                 if (this.isFunc(cbfunc)) {
                     cbfunc(instrument);
                 }
@@ -43,5 +48,34 @@ export default {
             this.instrument.stop(0, [this.currKeys[noteName]]);
             this.currKeys[noteName] = false;
         },
-    },
+        readFile: function (file) {
+            var reader = new FileReader();
+            if (file) {
+                reader.readAsArrayBuffer(file);
+            }
+            reader.addEventListener("load", (ev) => {
+                this.midiFile = reader.result;
+            });
+        },
+        onFileChanged: function () { },
+    },/* 
+    watch: {
+        midiFile: function () {
+            if (this.midiplayer !== null) {
+                console.log('aaa');
+                this.midiplayer.stop();
+            } else {
+                this.midiplayer = new MidiPlayer.Player((ev) => {
+                    for (var func of this.playMidiFuncs) {
+                        if (this.isFunc(func)) {
+                            func(ev);
+                        }
+                    }
+                });
+                this.midiplayer.loadArrayBuffer(this.midiFile);
+                console.log(this.midiplayer);
+                this.midiplayer.play();
+            }
+        }
+    } */
 }

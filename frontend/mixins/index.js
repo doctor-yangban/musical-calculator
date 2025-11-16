@@ -13,6 +13,13 @@ export default {
     watch: {
         buttonsSet: function () {
             this.initPlayer(this.initFuncCb);
-        }
+        },
+        /* midiFile: function (nval, oval) {
+            if (this.midiplayer !== null) {
+                this.midiplayer.stop();
+            } else {
+                this.initPlayer(this.initFuncCb);
+            }
+        } */
     }
 }
