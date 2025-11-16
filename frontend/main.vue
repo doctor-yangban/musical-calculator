@@ -1,12 +1,13 @@
 <script setup>
 import calculator from './components/calculator.vue';
 import midiPlayer from './components/midiPlayer.vue';
-import player from './mixins/player';
+import mixins from './mixins';
 </script>
 <template>
-    <div class="calculators">
-        <calculator :local-midi-file="midiFile" />
-        <calculator :button-map="rightCalculatorBtnMap" :local-midi-file="midiFile" />
+    <div class="calculators" ref="calculators" tabindex="0">
+        <calculator :local-midi-file="midiFile" :calculator-outer-div="$refs.calculators" />
+        <calculator :button-map="rightCalculatorBtnMap" :local-midi-file="midiFile" :key-map="rightCalculatorKeyMap"
+            :calculator-outer-div="$refs.calculators" />
     </div>
     <midiPlayer />
 </template>
@@ -21,7 +22,7 @@ import player from './mixins/player';
 </style>
 <script>
 export default {
-    mixins: [player],
+    mixins: [mixins],
     data: function () {
         return {
             rightCalculatorBtnMap: {
@@ -39,6 +40,22 @@ export default {
                 '*': 'Gs5',
                 '/': 'As5',
                 '=': 'C6',
+            },
+            rightCalculatorKeyMap: {
+                97: '1',
+                98: '2',
+                99: '3',
+                100: '4',
+                101: '5',
+                102: '6',
+                103: '7',
+                104: '8',
+                105: '9',
+                107: '+',
+                111: '/',
+                109: '-',
+                106: '*',
+                13: '=',
             }
         }
     },

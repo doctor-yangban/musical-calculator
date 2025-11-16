@@ -196,6 +196,9 @@ export default {
                 '*': 'G5',
                 '/': 'A5',
                 '=': 'B5',
+                '0': null,
+                '00': null,
+                '.': null,
             }
         },
         tabidx: {
@@ -217,7 +220,14 @@ export default {
                 57: '9',
                 187: '=',
                 189: '-',
+                219: '+',
+                221: '/',
             }
+        },
+        calculatorOuterDiv: {
+            type: [HTMLElement, null],
+            required: false,
+            default: null,
         }
     },
     data: function () {
@@ -232,7 +242,9 @@ export default {
                         setTimeout(() => {
                             buttons[key].classList.remove("highlight");
                         }, this.config?.duration || 800);
-                        this.playNote(this.buttonMap[key]);
+                        if (this.buttonMap[key] !== null) {
+                            this.playNote(this.buttonMap[key]);
+                        }
                     }
                 },
                 (key, buttons) => {
@@ -303,7 +315,7 @@ export default {
                 })(key); */
                 //this.addBtnClickListener(key, buttons);
             }
-            this.$refs.calculator.addEventListener("keydown", (ev) => {
+            this.$el.parentElement.addEventListener("keydown", (ev) => {
                 var button = buttons[this.keyMap[ev.keyCode]];
                 console.log(this.keyMap[ev.keyCode]);
                 console.log(buttons);
