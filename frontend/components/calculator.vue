@@ -278,7 +278,14 @@ export default {
                 rtobj[this.buttonMap[key]] = key;
             }
             return rtobj;
-        }
+        },
+        buttonToNote: function () {
+            var rtobj = {};
+            for (var key in this.buttonMap) {
+                rtobj[key] = this.buttonMap[key];
+            }
+            return rtobj;
+        },
     },
     methods: {
         /* btnClickListenerFunc: function (ev, btnKey, buttons) {
@@ -310,6 +317,7 @@ export default {
                     continue;
                 }
                 this.addBtnClickListener(key);
+                this.setBtn({ btn: buttons[key], key: this.buttonToNote[key], note: this.buttonMap[key] });
                 /* ((key) => {
                     buttons[key].addEventListener("click", this.btnClickListenerFunc);
                 })(key); */
@@ -375,8 +383,10 @@ export default {
             reader.addEventListener("load", (ev) => {
                 this.localMidiFile = reader.result;
             });
+        },
+        setBtn: function (btn) {
+            this.$emit("setBtn", { btn: btn, target: this });
         }
-
     },
     mounted: function () {
         this.initFuncCb = (inst) => {
@@ -423,5 +433,6 @@ export default {
             }
         },
     },
+    emits: ['setBtn'],
 }
 </script>
