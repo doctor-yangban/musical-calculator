@@ -17,6 +17,7 @@ import MidiPlayer from 'midi-player-js';
         <button @click="midiplayer !== null ? midiplayer.play() : {};">play midi</button>
         <input type="text"
             @input="config.duration = ($event.target.value.length >= 3) ? parseInt($event.target.value) : config.duration">
+        <input type="text" v-model="tempo">
     </div>
 
 </template>
@@ -67,6 +68,7 @@ export default {
                 13: '=',
             },
             midiToPlay: null,
+            tempo: 120,
         }
     },
     methods: {
@@ -77,11 +79,15 @@ export default {
         },
         playMidi: function (midi) {
             this.midiplayer = new MidiPlayer.Player();
+            this.midiplayer.tempo = Number(this.tempo);
+            console.log(this.midiplayer.tempo);
             this.midiplayer.on('midiEvent', (ev) => {
                 console.log('aaa');
                 if (ev.name === 'Note on') {
                     setTimeout(() => {
-                        var button = this.buttons[this.keyMap[ev.noteName]];
+                        var button = this.buttons[this.keyMap[ev.noteName] || this.keyMap[this.flatToSharpMap[ev.noteName]]];
+                        console.log(ev.noteName);
+                        console.log(this.keyMap);
                         console.log(this.keyMap[ev.noteName]);
                         if (button && button !== null) {
                             button.click();

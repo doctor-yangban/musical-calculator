@@ -49,6 +49,28 @@ export default {
                 20: "C3"
             },
             noteNames: ["C3", "D3", "E3", "F3", "G3", "A4", "B4", "C4", "D4", "E4", "F4", "G4", "A5", "B5", "C5", "D5", "E5", "F5", "G5", "A6", "B6", "C6", "Cs3", "Ds3", "F3", "Fs3", "Gs3", "As4", "C4", "Cs4", "Ds4", "F4", "Fs4", "Gs4", "As5", "C5", "Cs5", "Ds5", "F5", "Fs5", "Gs5", "As6", "C3"],
+            flatToSharpMap: {
+                'Db3': 'Cs3',
+                'Eb3': 'Ds3',
+                'Gb3': 'Fs3',
+                'Ab3': 'Gs3',
+                'Bb3': 'As3',
+                'Db4': 'Cs4',
+                'Eb4': 'Ds4',
+                'Gb4': 'Fs4',
+                'Ab4': 'Gs4',
+                'Bb4': 'As4',
+                'Db5': 'Cs5',
+                'Eb5': 'Ds5',
+                'Gb5': 'Fs5',
+                'Ab5': 'Gs5',
+                'Bb5': 'As5',
+                'Db6': 'Cs6',
+                'Eb6': 'Ds6',
+                'Gb6': 'Fs6',
+                'Ab6': 'Gs6',
+                'Bb6': 'As6',
+            }
         }
     },
     computed: {},
